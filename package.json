@@ -1,0 +1,8 @@
+{
+	"name": "shared-cache",
+	"description": "Share information about cache states",
+	"dependencies": {
+		"redis": "*"
+	},
+	"main": "./lib/index"
+}
