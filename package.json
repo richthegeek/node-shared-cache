@@ -1,6 +1,7 @@
 {
 	"name": "shared-cache",
 	"description": "Share information about cache states",
+	"version": "0.1.0",
 	"dependencies": {
 		"redis": "*"
 	},

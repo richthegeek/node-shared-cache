@@ -3,6 +3,9 @@ module.exports = class Cache
 
 	constructor: (@key, auto_update, update_callback) ->
 
+		Cache.singletons ?= {}
+		Cache.singletons[key] = @
+
 		Cache.RedisIn ?= redis.createClient()
 		Cache.RedisOut ?= redis.createClient()
 		ps = Cache.RedisIn
@@ -15,24 +18,28 @@ module.exports = class Cache
 				else
 					@set JSON.parse(message), false
 
-		@data = false
-		@is_stale = true
-		@queue = []
-
 		if typeof auto_update is 'function'
 			update_callback = auto_update
 			auto_update = true
 
+		@data = false
+		@is_stale = true
+		@queue = []
 		@auto_update = auto_update
 		@update_callback = update_callback
 
 		if auto_update
 			@update () -> null
 
+	@create = (key, auto_update, update_callback) ->
+		Cache.singletons ?= {}
+		new Cache key, auto_update, update_callback
+		return Cache.singletons[key]
+
 	get: (callback) ->
 		if not @is_stale
 			# use nextTick to prevent Zalgo from escaping
-			process.nextTick () => callback null, @data
+			process.nextTick () => callback null, @data, true
 			return @data
 
 		@update callback
@@ -52,7 +59,7 @@ module.exports = class Cache
 					@is_stale = false
 				@data = data
 				while fn = @queue.shift() when fn.call
-					fn err, data
+					fn err, data, false
 		@queue.push callback
 
 	stale: (broadcast = true) ->
