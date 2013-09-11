@@ -33,7 +33,12 @@ module.exports = class Cache
 
 	@create = (key, auto_update, update_callback) ->
 		Cache.singletons ?= {}
-		new Cache key, auto_update, update_callback
+		Cache.singletons[key] ?= new Cache key, auto_update, update_callback
+		# turn on auto_update if it's defined
+		Cache.singletons[key].auto_update = Cache.singletons[key].auto_update or auto_update
+		# if the previous instance was not a getter, define the update callback...
+		Cache.singletons[key].update_callback = Cache.singletons[key].update_callback or update_callback
+
 		return Cache.singletons[key]
 
 	get: (callback) ->
@@ -54,7 +59,8 @@ module.exports = class Cache
 
 	update: (callback) ->
 		if @queue.length is 0
-			@update_callback @key, (err, data) =>
+			fallback = (key, next) -> next 'No update function defined!'
+			(@update_callback or fallback) @key, (err, data) =>
 				if not err
 					@is_stale = false
 				@data = data

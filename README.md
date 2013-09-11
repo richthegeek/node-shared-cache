@@ -9,7 +9,7 @@ function update_info(cache_key, next) {
 }
 
 Cache = require('shared-cache')
-info = new Cache('caching key', true, update_info)
+info = Cache.create('caching key', true, update_info)
 
 possibly_stale = info.get();
 info.get(function(err, definitely_not_stale) {
@@ -18,6 +18,9 @@ info.get(function(err, definitely_not_stale) {
 ```
 
 # Methods
+
+## create( key, auto_update, update_callback )
+Returns a caching instance from the singleton pool.
 
 ## get( [callback] )
 This function both returns and executes a callback.
