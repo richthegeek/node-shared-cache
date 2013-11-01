@@ -3,6 +3,8 @@ module.exports = class Cache
 
 	constructor: (@key, auto_update, update_callback) ->
 
+		console.log 'New cache:', key
+
 		Cache.singletons ?= {}
 		Cache.singletons[key] = @
 
