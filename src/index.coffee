@@ -2,14 +2,15 @@ redis = require 'redis'
 module.exports = class Cache
 
 	constructor: (@key, auto_update, update_callback) ->
-
-		console.log 'New cache:', key
-
 		Cache.singletons ?= {}
 		Cache.singletons[key] = @
 
 		Cache.RedisIn ?= redis.createClient()
 		Cache.RedisOut ?= redis.createClient()
+
+		Cache.RedisIn.setMaxListeners Math.max 10, Cache.RedisIn._maxListeners + 1
+		Cache.RedisOut.setMaxListeners Math.max 10, Cache.RedisOut._maxListeners + 1
+
 		ps = Cache.RedisIn
 
 		ps.subscribe "dcache:#{@key}"
